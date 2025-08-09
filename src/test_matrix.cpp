@@ -1,9 +1,12 @@
 #include "matrix.h"
+#include <iostream>
+
+using std::cout;
+using std::endl;
 
 int main() {
-    Matrix mat0(5);
-    mat0.print();
-
-    Matrix mat1(3, 4);
-    mat1.print();
+    Matrix mat({1,2,3});
+    int num = 3;
+    auto res = mat*num;
+    cout << mat << "\n*" << num << "=\n" << (mat*num) << endl;
 }
