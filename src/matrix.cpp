@@ -3,6 +3,10 @@
 #include <vector>
 #include <exception>
 #include <utility>
+#include <random>
+
+Matrix::Matrix():
+    Matrix(0) {}
 
 Matrix::Matrix(int entries):
     Matrix(entries, entries) {}
@@ -12,8 +16,8 @@ Matrix::Matrix(int c_n_rows, int c_n_cols):
     mat(c_n_rows, std::vector<double>(c_n_cols, 0)) {}
 
 Matrix::Matrix(std::initializer_list<double> entries):
-    n_rows{static_cast<int>(entries.size())}, n_cols{static_cast<int>(entries.size())},
-    mat(static_cast<int>(entries.size()), std::vector<double>(entries)) {}
+    n_rows{1}, n_cols{static_cast<int>(entries.size())},
+    mat(1, std::vector<double>(entries)) {}
 
 Matrix::Matrix(std::initializer_list<std::initializer_list<double>> c_mat):
     n_rows{static_cast<int>(c_mat.size())}, n_cols{static_cast<int>(c_mat.begin()->size())}
@@ -44,9 +48,26 @@ const double& Matrix::operator()(int row, int col) const {
     return(mat[row][col]);
 }
 
+Matrix& Matrix::operator=(std::initializer_list<double> new_mat){
+    Matrix temp(new_mat);
+    return *this = temp;
+}
+
 Matrix& Matrix::operator=(std::initializer_list<std::initializer_list<double>> new_mat) {
     Matrix temp(new_mat);
     return *this = temp;
+}
+
+Matrix& Matrix::randomize() {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(0.0, 1.0);
+    for (int i = 0; i < n_rows; i++) {
+        for (int j = 0; j < n_cols; j++) {
+            (*this)[i][j] = dis(gen);
+        }
+    }
+    return *this;
 }
 
 Matrix Matrix::operator+(const Matrix& mat_rhs) const {
@@ -56,10 +77,14 @@ Matrix Matrix::operator+(const Matrix& mat_rhs) const {
     Matrix res(n_rows,n_cols);
     for (int i = 0; i < n_rows; i++) {
         for (int j = 0; j < n_cols; j++) {
-            res[i][j] += mat_rhs[i][j];
+            res[i][j] = (*this)[i][j] + mat_rhs[i][j];
         }
     }
     return res;
+}
+
+Matrix Matrix::operator-(const Matrix& mat_rhs) const {
+    return (*this) + (mat_rhs*-1);
 }
 
 Matrix Matrix::operator*(const double nbr) const {
@@ -72,11 +97,49 @@ Matrix Matrix::operator*(const double nbr) const {
     return res;
 }
 
-Matrix Matrix::operator*(const double nbr) {
+/*Matrix Matrix::operator*(const double nbr) { //This enables some extra functionallity, but I suspect that it's slow so let's have it disabled for now
     Matrix res(n_rows,n_cols);
     for (int i = 0; i < n_rows; i++) {
         for (int j = 0; j < n_cols; j++) {
             res[i][j] = (*this)[i][j] * nbr;
+        }
+    }
+    return res;
+}*/
+
+Matrix Matrix::operator*(const Matrix& mat_rhs) const {
+    Matrix res(n_rows,n_cols);
+    for (int i = 0; i < n_rows; i++) {
+        for (int j = 0; j < n_cols; j++) {
+            res[i][j] = (*this)[i][j] * mat_rhs[i][j];
+        }
+    }
+    return res;
+}
+
+Matrix Matrix::operator&(const Matrix& mat_rhs) const {
+    if (n_cols != mat_rhs.dims().first) {
+        throw std::range_error("Matricies have incompatible number of rows/cols for matrix multiplication");
+    }
+    Matrix res(n_rows,  mat_rhs.dims().second);
+    double temp{};
+    for (int i = 0; i < res.dims().first; i++) {
+        for (int j = 0; j < res.dims().second; j++) {
+            for (int k = 0; k < n_cols; k++) {
+                temp += ((*this)[i][k] + mat_rhs[k][j]);
+            }
+            res[i][j] = temp;
+            temp = 0;
+        }
+    }
+    return res;
+}
+
+Matrix Matrix::T() const {
+    Matrix res(n_cols, n_rows);
+    for (int i = 0; i < n_cols; i++) {
+        for (int j = 0; j < n_rows; j++) {
+            res[i][j] = (*this)[j][i];
         }
     }
     return res;

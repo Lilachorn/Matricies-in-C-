@@ -7,6 +7,7 @@
 
 class Matrix {
 public:
+    Matrix();
     Matrix(int);
     Matrix(int, int);
     Matrix(std::initializer_list<double>);
@@ -17,12 +18,17 @@ public:
     double& operator()(int,int);
     const double& operator()(int,int) const;
 
+    Matrix& operator=(std::initializer_list<double>);
     Matrix& operator=(std::initializer_list<std::initializer_list<double>>);
+    Matrix& randomize();
 
     Matrix operator+(const Matrix&) const;
+    Matrix operator-(const Matrix&) const;
     Matrix operator*(const double) const;
-    Matrix operator*(const double);
+    //Matrix operator*(const double);
     Matrix operator*(const Matrix&) const;
+    Matrix operator&(const Matrix&) const;
+    Matrix T() const;
 
     std::pair<int,int> dims() const;
 

@@ -5,8 +5,11 @@ using std::cout;
 using std::endl;
 
 int main() {
-    Matrix mat({1,2,3});
-    int num = 3;
-    auto res = mat*num;
-    cout << mat << "\n*" << num << "=\n" << (mat*num) << endl;
+    Matrix mat0(55,2);
+    Matrix mat1(3,64);
+    mat0.randomize();
+    mat1.randomize();
+    cout << mat0 << endl;
+    cout << mat1 << endl;
+    cout << (mat0 & mat1) << endl;
 }
